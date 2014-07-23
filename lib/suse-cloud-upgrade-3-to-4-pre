@@ -112,7 +112,7 @@ fi
 echo_summary "Deactivating OpenStack barclamp proposals..."
 
 for barclamp in heat ceilometer nova_dashboard nova neutron cinder glance ceph swift keystone rabbitmq database pacemaker; do
-  applied_proposals=$(crowbar "$barclamp" list)
+  applied_proposals=$(crowbar "$barclamp" list )
   if test "$applied_proposals" == "No current configurations"; then
     continue
   fi
@@ -123,17 +123,41 @@ for barclamp in heat ceilometer nova_dashboard nova neutron cinder glance ceph s
   done
 done
 
+# This is expected to return a failure when pacemaker is not present (e.g. non-HA-setup)
+set +e
+applied_proposal=$(crowbar pacemaker list &>/dev/zero)
+if test  $? == 0 ; then
+  applied_proposal=$(crowbar pacemaker list)
+  for  proposal in $applied_proposals; do
+    echo "Deactivating proposal $proposal of barclamp pacemaker..."
+    crowbar pacemaker delete $applied_proposals
+  done
+fi
+set -e
+
 # Double-check there's nothing left; we do another loop to avoid a race where
 # the proposal is still listed, just after we deleted it
 sleep 10
 
-for barclamp in heat ceilometer nova_dashboard nova neutron cinder glance ceph swift keystone rabbitmq database pacemaker; do
+for barclamp in heat ceilometer nova_dashboard nova neutron cinder glance ceph swift keystone rabbitmq database; do
   applied_proposals=$(crowbar "$barclamp" list)
   if test "$applied_proposals" != "No current configurations"; then
     die "Was not able to deactivate all proposals for $barclamp."
   fi
 done
 
+# This is expected to return a failure when pacemaker is not present (e.g. non-HA-setup)
+set +e
+applied_proposal=$(crowbar pacemaker list &>/dev/zero)
+if test  $? == 0 ; then
+  applied_proposal=$(crowbar pacemaker list)
+  for  proposal in $applied_proposals; do
+    if test "$applied_proposals" != "No current configurations"; then
+    die "Was not able to deactivate all proposals for pacemaker."
+    fi
+  done
+fi
+set -e
 
 ### Stop openstack services
 echo_summary "Stopping OpenStack services..."
