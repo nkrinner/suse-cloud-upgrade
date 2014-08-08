@@ -187,7 +187,7 @@ get_allocated_nodes() {
 
   # Filter nodes for specific roles
   if [[ $2 != ""  ]]; then
-    nodes_with_role=$(knife search node "roles:$2" -a name | grep ^name: | cut -d : -f 2)
+    nodes_with_role=$(knife search node "$2:*" -a name | grep ^name: | cut -d : -f 2)
 
     # We cannot change allocated_nodes yet, as we need it for string comparison
     found_nodes=

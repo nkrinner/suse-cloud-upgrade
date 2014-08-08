@@ -22,7 +22,7 @@ prepare_neutron_migration() {
 
   # Get nodes that have the neutron_server role
   neutron_nodes=
-  get_allocated_nodes neutron_nodes "neutron_server"
+  get_allocated_nodes neutron_nodes "neutron-server"
 
   for i in $neutron_nodes; do
     ssh $i 'neutron-db-manage --config-file /etc/neutron/neutron.conf \
@@ -37,7 +37,7 @@ finish_neutron_migration() {
 
   # Get nodes that have the neutron_server role
   neutron_nodes=
-  get_allocated_nodes neutron_nodes "neutron_server"
+  get_allocated_nodes neutron_nodes "neutron-server"
 
   for i in $neutron_nodes; do
     ssh $i 'neutron-db-manage --config-file /etc/neutron/neutron.conf \
