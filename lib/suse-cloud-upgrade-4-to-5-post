@@ -58,6 +58,17 @@ for barclamp in updater suse-manager-client nfs_client cisco-ucs hyperv heat cei
 done
 
 
+### Put all the cluster nodes back online
+for founder in $(<"${UPGRADE_DATA_DIR}/cluster_founders"); do
+  echo_summary "Putting cluster nodes online from founder $founder..."
+  ssh $founder '
+    for node in $(crm node list | grep -v standby | grep -v maintenance | cut -d : -f 1); do
+      crm node online $node
+    done
+    '
+done
+
+
 ### Drop roles that are gone
 echo_summary "Removing obsolete data..."
 
