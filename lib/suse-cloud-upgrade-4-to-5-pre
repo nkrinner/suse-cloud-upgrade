@@ -162,15 +162,7 @@ for founder in $cluster_founders; do
   echo $founder >> "${UPGRADE_DATA_DIR}/cluster_founders"
   echo_summary "Stopping crm resources on ${founder}..."
   ssh $founder '
-    for type in clone group ms primitive; do
-      for resource in $(crm configure show | grep ^$type | cut -d " " -f2); do
-        crm resource stop $resource
-      done
-    done
-
-    for node in $(crm node list | grep -v standby | grep -v maintenance | cut -d : -f 1); do
-      crm node standby $node
-    done
+    rcopenais stop
     '
 done
 
